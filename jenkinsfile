@@ -105,6 +105,19 @@ pipeline {
                 }
             }
         }
+
+        stage('Upload K8s Manifests to Nexus') {
+            steps {
+                echo '📦 Upload des manifests Kubernetes vers Nexus...'
+                withCredentials([usernamePassword(credentialsId: "${CREDENTIALS_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    bat """
+                        curl -u %NEXUS_USER%:%NEXUS_PASS% --upload-file k8s/deployment.yaml %NEXUS_URL%/repository/%NEXUS_REPO%/k8s/deployment.yaml
+                        curl -u %NEXUS_USER%:%NEXUS_PASS% --upload-file k8s/service.yaml %NEXUS_URL%/repository/%NEXUS_REPO%/k8s/service.yaml
+                    """
+                }
+            }
+        }
+   
     }
 
     post {
