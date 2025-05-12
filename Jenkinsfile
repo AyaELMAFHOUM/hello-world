@@ -16,9 +16,18 @@ pipeline {
         DOCKER_IMAGE_TAG = 'latest'
         NEXUS_DOCKER_REPO = 'docker_image'
         NEXUS_DOCKER_REGISTRY = 'localhost:5000'
+        
     }
-
+    
     stages {
+        
+        stage('Checkout') {
+            steps {
+            checkout scm
+            }
+        }
+        
+        
         stage('Build') {
             steps {
                 echo 'Build du projet Java...'
@@ -26,6 +35,8 @@ pipeline {
                 bat 'dir target'
             }
         }
+        
+        
 
         stage('Deploy to Nexus') {
             steps {
@@ -93,14 +104,14 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image to Nexus') {
+        stage('Push Docker Image to Docker Hub') { 
             steps {
-                echo 'Push de l\'image Docker vers Nexus...'
-                withCredentials([usernamePassword(credentialsId: "${CREDENTIALS_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                echo '🚀 Push de l\'image Docker vers Docker Hub...'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-account', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                     bat """
-                        docker tag %DOCKER_IMAGE_NAME%:%DOCKER_IMAGE_TAG% %NEXUS_DOCKER_REGISTRY%/%NEXUS_DOCKER_REPO%/%DOCKER_IMAGE_NAME%:%DOCKER_IMAGE_TAG%
-                        docker login %NEXUS_DOCKER_REGISTRY% -u %NEXUS_USER% -p %NEXUS_PASS%
-                        docker push %NEXUS_DOCKER_REGISTRY%/%NEXUS_DOCKER_REPO%/%DOCKER_IMAGE_NAME%:%DOCKER_IMAGE_TAG%
+                        docker tag %DOCKER_IMAGE_NAME%:%DOCKER_IMAGE_TAG% %DOCKERHUB_USER%/%DOCKER_IMAGE_NAME%:%DOCKER_IMAGE_TAG%
+                        docker login -u %DOCKERHUB_USER% -p %DOCKERHUB_PASS%
+                        docker push %DOCKERHUB_USER%/%DOCKER_IMAGE_NAME%:%DOCKER_IMAGE_TAG%
                     """
                 }
             }
@@ -111,13 +122,11 @@ pipeline {
                 echo '📦 Upload des manifests Kubernetes vers Nexus...'
                 withCredentials([usernamePassword(credentialsId: "${CREDENTIALS_ID}", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                     bat """
-                        curl -u %NEXUS_USER%:%NEXUS_PASS% --upload-file k8s/deployment.yaml %NEXUS_URL%/repository/%NEXUS_REPO%/k8s/deployment.yaml
-                        curl -u %NEXUS_USER%:%NEXUS_PASS% --upload-file k8s/service.yaml %NEXUS_URL%/repository/%NEXUS_REPO%/k8s/service.yaml
+                        curl -u %NEXUS_USER%:%NEXUS_PASS% --upload-file "%CD%\\k8s\\svc.yaml" %NEXUS_URL%/repository/%NEXUS_REPO%/k8s/svc.yaml
                     """
                 }
             }
         }
-   
     }
 
     post {
@@ -129,3 +138,4 @@ pipeline {
         }
     }
 }
+
