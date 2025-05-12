@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: hello-world
-          image: aya452/my-docker-image:latest  
+          image: aya452/my-docker-image:latest
           ports:
             - containerPort: 8080
 ---
