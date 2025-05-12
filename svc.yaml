@@ -2,14 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: hello-world-deployment
-  namespace: default
+  namespace: hello
   labels:
     app: hello-world
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hello-world
+      app: hello-world   
   template:
     metadata:
       labels:
@@ -20,6 +20,7 @@ spec:
           image: aya452/my-docker-image:latest
           ports:
             - containerPort: 8080
+
 ---
 apiVersion: v1
 kind: Service
