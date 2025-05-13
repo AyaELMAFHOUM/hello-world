@@ -10,7 +10,8 @@ FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
-COPY --from=build /app/target/hello-world-0.0.1-SNAPSHOT.jar /app/hello-world.jar
+COPY --from=build /app/target/hello-world-0.0.1.jar /app/hello-world.jar
+
 
 EXPOSE 8080
 
